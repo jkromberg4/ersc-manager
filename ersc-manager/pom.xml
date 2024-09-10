@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="https://maven.apache.org/POM/4.0.0" 
+		 xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance" 
+		 xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.jkromberg.erscm</groupId>
+  <artifactId>ersc-manager</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Seamless Coop Manager</name>
+  <description>A manager for the Elden Ring Seamless Coop mod</description>
+  
+  	<properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+        <javafx.version>22.0.2</javafx.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        
+        <dependency>
+    		<groupId>net.lingala.zip4j</groupId>
+    		<artifactId>zip4j</artifactId>
+    		<version>2.11.5</version>
+		</dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--compile-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                </configuration>
+            </plugin>
+            <!--create linked image-->
+            <!--
+			  Workaround to make it run without CMD window:
+			  Build once, update image/bin/erscm-manager.bat with the following line:
+			  start "" "%DIR%\javaw" %JLINK_VM_OPTIONS% -m com.jkromberg.erscm/com.jkromberg.erscm.Main %* && exit 0
+			  Then remove jlink goal, build again, and replace jlink goal
+			-->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase><!--
+                        <goals>
+                            <goal>jlink</goal>
+                        </goals>-->
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>com.jkromberg.erscm/com.jkromberg.erscm.Main</mainClass>
+                    <compress>0</compress>
+                    <noManPages>true</noManPages>
+                    <noHeaderFiles>true</noHeaderFiles>
+                    <stripDebug>true</stripDebug>
+                    <launcher>${project.artifactId}</launcher>
+                </configuration>
+            </plugin>
+            <!--package image as an exe-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- obtain warp-packer.exe from: "https://github.com/dgiagio/warp/releases/download/v0.3.0/windows-x64.warp-packer.exe" -->
+                    <executable>${project.basedir}\tools\warp-packer.exe</executable>
+                    <arguments>
+                        <argument>--arch</argument>
+                        <argument>windows-x64</argument>
+
+                        <argument>--input_dir</argument>
+                        <argument>${project.build.directory}\image</argument>
+
+                        <argument>--exec</argument>
+                        <argument>bin\${project.artifactId}.bat</argument>
+
+                        <argument>--output</argument>
+                        <argument>${project.build.directory}\${project.artifactId}.exe</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
