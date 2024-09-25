@@ -785,6 +785,9 @@ public class View {
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
+					invalidLabel.setText("Error: config folder missing");
+					configNameField.requestFocus();
+					configNameField.selectAll();
 				}
 			} else {
 				invalidLabel.setText("Name contains invalid charaters");

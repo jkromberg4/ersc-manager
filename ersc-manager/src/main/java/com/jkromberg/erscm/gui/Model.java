@@ -1,8 +1,6 @@
 package com.jkromberg.erscm.gui;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
@@ -81,32 +79,17 @@ public class Model {
 		// Get manager settings if they exist, otherwise create them
 		erscmSettings = new Ini(progPath + "\\ERSC Manager\\erscm_settings.ini");
 		if (!erscmSettings.exists()) {
-			try (BufferedWriter writer = new BufferedWriter(new FileWriter(erscmSettings))) {
+			try {
 				erscmSettings.createNewFile();
-				writer.write("game_path = ");
-				writer.flush();
-				erscmSettings.parseData();
 			} catch (IOException e) {
 				e.printStackTrace();
-				erscmSettings = null;
 			}
 		}
 
 		// Locate game dir and create updater
-		if (erscmSettings != null) {
+		if (erscmSettings.exists()) {
 			gamePath = erscmSettings.get("game_path");
 			if (gamePath == null) {
-				try (BufferedWriter writer = new BufferedWriter(new FileWriter(erscmSettings))) {
-					writer.write("game_path = ");
-					writer.flush();
-					erscmSettings.parseData();
-				} catch (IOException e) {
-					e.printStackTrace();
-					erscmSettings = null;
-				}
-
-				updater = new Updater();
-			} else if (gamePath.equals("")) {
 				updater = new Updater();
 			} else {
 				updater = new Updater(gamePath, progPath);
@@ -294,14 +277,8 @@ public class Model {
 		updater.setGamePath(gamePath);
 
 		// Write change to erscm_settings.ini
-		if (erscmSettings != null) {
-			try (BufferedWriter writer = new BufferedWriter(new FileWriter(erscmSettings))) {
-				writer.write("game_path = " + gamePath);
-				writer.flush();
-				erscmSettings.parseData();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		if (erscmSettings.exists()) {
+			erscmSettings.set("game_path", gamePath);
 		}
 
 		// Check if Seamless Coop is on this path and get current settings if so
