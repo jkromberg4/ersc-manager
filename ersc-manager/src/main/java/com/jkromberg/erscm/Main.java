@@ -5,6 +5,8 @@ import com.jkromberg.erscm.gui.Model;
 import com.jkromberg.erscm.gui.View;
 
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -14,16 +16,32 @@ public class Main extends Application {
 	}
 
 	@Override
-	public void start(Stage mainStage) {
+	public void start(Stage primaryStage) {
 		Model model = new Model();
 		Controller controller = new Controller(model);
 		controller.setHostServices(getHostServices());
 		View view = new View(model, controller);
 
 		// Stage properties
-		mainStage.setScene(view.getScene());
-		mainStage.setTitle(View.TITLE);
-		mainStage.show();
+		primaryStage.setScene(view.getScene());
+		primaryStage.setTitle(View.TITLE);
+		primaryStage.getIcons().add(new Image(View.class.getResourceAsStream(View.ICON)));
+		primaryStage.setOpacity(0);
+		primaryStage.setOnShown(event -> {
+			new Thread(() -> {
+				try {
+					Thread.sleep(250);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				Platform.runLater(() -> {
+					primaryStage.setOpacity(1);
+				});
+			}).start();
+		});
+		
+		primaryStage.show();
 	}
 
 }

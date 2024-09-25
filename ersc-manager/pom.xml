@@ -27,12 +27,6 @@
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
         </dependency>
-        
-        <dependency>
-    		<groupId>net.lingala.zip4j</groupId>
-    		<artifactId>zip4j</artifactId>
-    		<version>2.11.5</version>
-		</dependency>
     </dependencies>
 
     <build>
@@ -60,10 +54,7 @@
                 <version>0.0.8</version>
                 <executions>
                     <execution>
-                        <phase>package</phase><!--
-                        <goals>
-                            <goal>jlink</goal>
-                        </goals>-->
+                        <phase>package</phase>
                     </execution>
                 </executions>
                 <configuration>

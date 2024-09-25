@@ -155,12 +155,17 @@ public class Model {
 	 * @param pathToStoreDefaultConfig Location that the default settings should be
 	 *                                 copied to
 	 */
-	public void updateERSC(String pathToStoreDefaultConfig) {
-		updater.update(pathToStoreDefaultConfig);
-		reacquireSettings();
-		Platform.runLater(() -> {
-			refreshConfigList();
-		});
+	public boolean updateERSC(String pathToStoreDefaultConfig) {
+		if (updater.update(pathToStoreDefaultConfig)) {
+			reacquireSettings();
+			Platform.runLater(() -> {
+				refreshConfigList();
+			});
+			
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**

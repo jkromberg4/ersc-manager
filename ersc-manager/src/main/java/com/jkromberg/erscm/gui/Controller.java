@@ -87,8 +87,8 @@ public class Controller {
 		}
 	}
 
-	public void updateERSC(String pathToStoreDefaultConfig) {
-		model.updateERSC(pathToStoreDefaultConfig);
+	public boolean updateERSC(String pathToStoreDefaultConfig) {
+		return model.updateERSC(pathToStoreDefaultConfig);
 	}
 
 	public void launchERSC() {

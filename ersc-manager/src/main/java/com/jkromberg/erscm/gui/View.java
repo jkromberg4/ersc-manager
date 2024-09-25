@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 import com.jkromberg.erscm.updater.Ini;
 
 import javafx.application.Platform;
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
@@ -31,23 +33,30 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 
 /**
  * The main scene for the gui.
  */
 public class View {
 
-	public static final String TITLE = "Elden Ring Seamless Coop Manager";
+	/* -- Constants -- */
+	public static final String TITLE = "Elden Ring Seamless Co-op Manager";
+	public static final String ICON = "grace.png";
+	public static final String STYLE_SHEET = "style.css";
+	
+	private static final int SPACING = 5;
+	private static final int POPUP_DELAY = 50;
+	private static final double OVERLAY_TRANSPARENCY = 0.5;
 
-	private static int spacing = 5;
-
+	/* -- General -- */
 	private Model model;
 	private Controller controller;
 
 	private boolean confirmed;
 	private boolean shouldClearConfigSelection;
 
-	/* -- GUI Controls -- */
+	/* -- GUI Elements -- */
 	private Scene configScene;
 
 	private BorderPane configPane;
@@ -111,7 +120,7 @@ public class View {
 	private void setupPane() {
 		// Config Pane
 		configPane = new BorderPane();
-		configPane.getStyleClass().addAll("theme", "main-pane");
+		configPane.getStyleClass().addAll("main-pane");
 
 		/* LEFT -- config selector */
 		configLeft = new VBox();
@@ -129,7 +138,7 @@ public class View {
 		configSelectControls = new HBox();
 		configSelectControls.getStyleClass().addAll("bottom-controls", "align-center");
 		configSelectControls.setAlignment(Pos.CENTER);
-		configSelectControls.setSpacing(spacing);
+		configSelectControls.setSpacing(SPACING);
 		configLeft.getChildren().add(configSelectControls);
 
 		deletePresetButton = new Button("Delete preset");
@@ -289,7 +298,7 @@ public class View {
 
 		// Scene properties
 		configScene = new Scene(configPane);
-		configScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+		configScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 	}
 
 	/**
@@ -316,20 +325,21 @@ public class View {
 	private void noER() {
 		final Stage noERpopup = new Stage();
 		noERpopup.setTitle(TITLE);
+		noERpopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		noERpopup.setOnCloseRequest(event -> {
 			Platform.exit();
 			System.exit(0);
 		});
 
 		VBox popupVBox = new VBox();
-		popupVBox.getStyleClass().addAll("theme", "popup");
+		popupVBox.getStyleClass().addAll("popup-pane");
 
 		Label popupLabel = new Label("Elden Ring installation not found. Please enter Elden Ring's location:\n\n"
 				+ "Path to eldenring.exe:");
 		popupLabel.getStyleClass().add("popup-label");
 
 		HBox folderSelectBox = new HBox();
-		folderSelectBox.setSpacing(spacing);
+		folderSelectBox.setSpacing(SPACING);
 		VBox.setVgrow(folderSelectBox, Priority.ALWAYS);
 
 		TextField locationField = new TextField();
@@ -377,7 +387,7 @@ public class View {
 		popupVBox.getChildren().addAll(popupLabel, folderSelectBox, wrongDirLabel, buttonBox);
 
 		Scene popupScene = new Scene(popupVBox);
-		popupScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		popupScene.setOnMousePressed(event -> {
 			popupVBox.requestFocus();
 		});
@@ -398,6 +408,7 @@ public class View {
 
 		final Stage noERSCpopup = new Stage();
 		noERSCpopup.setTitle(TITLE);
+		noERSCpopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		noERSCpopup.setResizable(false);
 		noERSCpopup.setOnCloseRequest(event -> {
 			Platform.exit();
@@ -405,7 +416,7 @@ public class View {
 		});
 
 		VBox popupVBox = new VBox();
-		popupVBox.getStyleClass().addAll("theme", "popup");
+		popupVBox.getStyleClass().addAll("popup-pane");
 		popupVBox.setAlignment(Pos.CENTER);
 
 		Label popupLabel = new Label("Elden Ring Seamless Coop not installed.\n"
@@ -426,7 +437,7 @@ public class View {
 		popupVBox.getChildren().addAll(popupLabel, buttonBox);
 
 		Scene popupScene = new Scene(popupVBox);
-		popupScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		popupScene.setOnMousePressed(event -> {
 			popupVBox.requestFocus();
 		});
@@ -588,9 +599,7 @@ public class View {
 	private void addHandlers() {
 		/* -- GENERAL -- */
 		configScene.setOnMousePressed(event -> {
-			if (!configListView.isFocused()) {
-				configPane.requestFocus();
-			}
+			configPane.requestFocus();
 		});
 
 		/* -- LEFT -- */
@@ -677,13 +686,59 @@ public class View {
 	 * Popup to create a new config
 	 */
 	private void createNewConfig() {
+		final Window mainWindow = configScene.getWindow();
+		
+		// Overlay stage to darken main stage
+		final Stage overlayStage = new Stage();
+		overlayStage.initOwner(mainWindow);
+		overlayStage.initModality(Modality.WINDOW_MODAL);
+		overlayStage.initStyle(StageStyle.TRANSPARENT);
+		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
+		overlayStage.setX(mainWindow.getX() + configScene.getX());
+		overlayStage.setY(mainWindow.getY() + configScene.getY());
+		
+		VBox overlayBox = new VBox();
+		overlayBox.getStyleClass().add("popup-overlay");
+		
+		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
+		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
+		overlayStage.setScene(overlayScene);
+		overlayStage.show();
+		
+		// Popup stage
 		final Stage newConfigPopup = new Stage();
 		newConfigPopup.setTitle("Create new config");
-		newConfigPopup.initModality(Modality.APPLICATION_MODAL);
+		newConfigPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
+		newConfigPopup.initOwner(overlayStage);
+		newConfigPopup.initModality(Modality.WINDOW_MODAL);
 		newConfigPopup.setResizable(false);
+		newConfigPopup.setOpacity(0);
+		newConfigPopup.setOnShown(event -> {
+			newConfigPopup.setX(mainWindow.getX() + mainWindow.getWidth() / 2 - newConfigPopup.getWidth() / 2);
+			newConfigPopup.setY(mainWindow.getY() + mainWindow.getHeight() / 2 - newConfigPopup.getHeight() / 2);
 
+			new Thread(() -> {
+				try {
+					Thread.sleep(POPUP_DELAY);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				Platform.runLater(() -> {
+					newConfigPopup.setOpacity(1);
+				});
+			}).start();
+		});
+		
+		newConfigPopup.setOnHidden(event -> {
+			Platform.runLater(() -> {
+				overlayStage.close();
+			});
+		});
+
+		// Setup popup scene
 		VBox popupVBox = new VBox();
-		popupVBox.getStyleClass().addAll("theme", "popup");
+		popupVBox.getStyleClass().addAll("popup-pane");
 		popupVBox.setAlignment(Pos.CENTER);
 
 		Label popupLabel = new Label("Save the current settings as a new preset.\n"
@@ -732,7 +787,7 @@ public class View {
 					e.printStackTrace();
 				}
 			} else {
-				invalidLabel.setText("Name contains invalid characters");
+				invalidLabel.setText("Name contains invalid charaters");
 				configNameField.requestFocus();
 				configNameField.selectAll();
 			}
@@ -748,7 +803,7 @@ public class View {
 		popupVBox.getChildren().addAll(popupLabel, configNameField, invalidLabel, buttonBox);
 
 		Scene popupScene = new Scene(popupVBox);
-		popupScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 
 		popupScene.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ENTER) {
@@ -758,7 +813,7 @@ public class View {
 
 		configNameField.requestFocus();
 		newConfigPopup.setScene(popupScene);
-		newConfigPopup.showAndWait();
+		newConfigPopup.show();
 	}
 
 	/**
@@ -773,13 +828,59 @@ public class View {
 			return;
 		}
 
+		final Window mainWindow = configScene.getWindow();
+		
+		// Overlay stage to darken main stage
+		final Stage overlayStage = new Stage();
+		overlayStage.initOwner(mainWindow);
+		overlayStage.initModality(Modality.WINDOW_MODAL);
+		overlayStage.initStyle(StageStyle.TRANSPARENT);
+		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
+		overlayStage.setX(mainWindow.getX() + configScene.getX());
+		overlayStage.setY(mainWindow.getY() + configScene.getY());
+		
+		VBox overlayBox = new VBox();
+		overlayBox.getStyleClass().add("popup-overlay");
+		
+		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
+		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
+		overlayStage.setScene(overlayScene);
+		overlayStage.show();
+		
+		// Popup stage
 		final Stage convertPopup = new Stage();
-		convertPopup.setTitle("Convert posture scaling to absoprtion");
-		convertPopup.initModality(Modality.APPLICATION_MODAL);
+		convertPopup.setTitle("Convert posture scaling to absorption");
+		convertPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
+		convertPopup.initOwner(overlayStage);
+		convertPopup.initModality(Modality.WINDOW_MODAL);
 		convertPopup.setResizable(false);
+		convertPopup.setOpacity(0);
+		convertPopup.setOnShown(event -> {
+			convertPopup.setX(mainWindow.getX() + mainWindow.getWidth() / 2 - convertPopup.getWidth() / 2);
+			convertPopup.setY(mainWindow.getY() + mainWindow.getHeight() / 2 - convertPopup.getHeight() / 2);
 
+			new Thread(() -> {
+				try {
+					Thread.sleep(POPUP_DELAY);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				Platform.runLater(() -> {
+					convertPopup.setOpacity(1);
+				});
+			}).start();
+		});
+		
+		convertPopup.setOnHidden(event -> {
+			Platform.runLater(() -> {
+				overlayStage.close();
+			});
+		});
+
+		// Setup popup scene
 		VBox popupVBox = new VBox();
-		popupVBox.getStyleClass().addAll("theme", "popup");
+		popupVBox.getStyleClass().addAll("popup-pane");
 		popupVBox.setAlignment(Pos.CENTER);
 
 		Label popupLabel = new Label("Enter number of players and amount of extra posture per\n"
@@ -789,10 +890,14 @@ public class View {
 		Label spacerLabel = new Label();
 		spacerLabel.getStyleClass().add("error-label");
 
+		HBox gridContainer = new HBox();
+		gridContainer.setAlignment(Pos.CENTER);
+		
 		GridPane convertPane = new GridPane();
 		convertPane.setStyle("-fx-hgap: 5; -fx-vgap: 1;");
 
 		Label numPlayersLabel = new Label("Number of players:");
+		GridPane.setHalignment(numPlayersLabel, HPos.RIGHT);
 		TextField numPlayersField = new TextField();
 		Label postureScalingLabel = new Label("Extra posture (%) per player:");
 		TextField postureScalingField = new TextField();
@@ -862,13 +967,15 @@ public class View {
 		convertPane.add(numPlayersField, 1, 0);
 		convertPane.add(postureScalingLabel, 0, 1);
 		convertPane.add(postureScalingField, 1, 1);
+		
+		gridContainer.getChildren().add(convertPane);
 
 		buttonBox.getChildren().addAll(convertButton, cancelButton);
 
-		popupVBox.getChildren().addAll(popupLabel, spacerLabel, convertPane, invalidLabel, buttonBox);
+		popupVBox.getChildren().addAll(popupLabel, spacerLabel, gridContainer, invalidLabel, buttonBox);
 
 		Scene popupScene = new Scene(popupVBox);
-		popupScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		popupScene.setOnMousePressed(event -> {
 			popupVBox.requestFocus();
 		});
@@ -881,20 +988,66 @@ public class View {
 
 		numPlayersField.requestFocus();
 		convertPopup.setScene(popupScene);
-		convertPopup.showAndWait();
+		convertPopup.show();
 	}
 
 	/**
 	 * Popup to create a new save file extension.
 	 */
 	private void createSaveExt() {
+		final Window mainWindow = configScene.getWindow();
+		
+		// Overlay stage to darken main stage
+		final Stage overlayStage = new Stage();
+		overlayStage.initOwner(mainWindow);
+		overlayStage.initModality(Modality.WINDOW_MODAL);
+		overlayStage.initStyle(StageStyle.TRANSPARENT);
+		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
+		overlayStage.setX(mainWindow.getX() + configScene.getX());
+		overlayStage.setY(mainWindow.getY() + configScene.getY());
+		
+		VBox overlayBox = new VBox();
+		overlayBox.getStyleClass().add("popup-overlay");
+		
+		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
+		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
+		overlayStage.setScene(overlayScene);
+		overlayStage.show();
+		
+		// Popup stage
 		final Stage saveExtPopup = new Stage();
 		saveExtPopup.setTitle("Create save file extension");
-		saveExtPopup.initModality(Modality.APPLICATION_MODAL);
+		saveExtPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
+		saveExtPopup.initOwner(overlayStage);
+		saveExtPopup.initModality(Modality.WINDOW_MODAL);
 		saveExtPopup.setResizable(false);
+		saveExtPopup.setOpacity(0);
+		saveExtPopup.setOnShown(event -> {
+			saveExtPopup.setX(mainWindow.getX() + mainWindow.getWidth() / 2 - saveExtPopup.getWidth() / 2);
+			saveExtPopup.setY(mainWindow.getY() + mainWindow.getHeight() / 2 - saveExtPopup.getHeight() / 2);
 
+			new Thread(() -> {
+				try {
+					Thread.sleep(POPUP_DELAY);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				Platform.runLater(() -> {
+					saveExtPopup.setOpacity(1);
+				});
+			}).start();
+		});
+		
+		saveExtPopup.setOnHidden(event -> {
+			Platform.runLater(() -> {
+				overlayStage.close();
+			});
+		});
+
+		// Setup popup scene
 		VBox popupVBox = new VBox();
-		popupVBox.getStyleClass().addAll("theme", "popup");
+		popupVBox.getStyleClass().addAll("popup-pane");
 		popupVBox.setAlignment(Pos.CENTER);
 
 		Label popupLabel = new Label("Enter new save file extension (vanilla game uses .sl2).\n"
@@ -931,7 +1084,7 @@ public class View {
 				saveFileChoice.setValue(newSaveExt);
 				saveExtPopup.close();
 			} else {
-				invalidExtLabel.setText("File extension must be alphanumeric.");
+				invalidExtLabel.setText("File extension must be alphanumeric");
 				saveFileField.requestFocus();
 				saveFileField.selectAll();
 			}
@@ -947,7 +1100,7 @@ public class View {
 		popupVBox.getChildren().addAll(popupLabel, saveFileField, invalidExtLabel, buttonBox);
 
 		Scene popupScene = new Scene(popupVBox);
-		popupScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 
 		popupScene.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ENTER) {
@@ -957,7 +1110,7 @@ public class View {
 
 		saveFileField.requestFocus();
 		saveExtPopup.setScene(popupScene);
-		saveExtPopup.showAndWait();
+		saveExtPopup.show();
 	}
 
 	/**
@@ -969,18 +1122,64 @@ public class View {
 	private boolean confirmSL2() {
 		confirmed = false;
 
+		final Window mainWindow = configScene.getWindow();
+		
+		// Overlay stage to darken main stage
+		final Stage overlayStage = new Stage();
+		overlayStage.initOwner(mainWindow);
+		overlayStage.initModality(Modality.WINDOW_MODAL);
+		overlayStage.initStyle(StageStyle.TRANSPARENT);
+		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
+		overlayStage.setX(mainWindow.getX() + configScene.getX());
+		overlayStage.setY(mainWindow.getY() + configScene.getY());
+		
+		VBox overlayBox = new VBox();
+		overlayBox.getStyleClass().add("popup-overlay");
+		
+		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
+		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
+		overlayStage.setScene(overlayScene);
+		overlayStage.show();
+		
+		// Popup stage
 		final Stage sl2Popup = new Stage();
-		sl2Popup.setTitle(TITLE);
-		sl2Popup.initModality(Modality.APPLICATION_MODAL);
+		sl2Popup.setTitle("Confirm extension selection");
+		sl2Popup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
+		sl2Popup.initOwner(overlayStage);
+		sl2Popup.initModality(Modality.WINDOW_MODAL);
 		sl2Popup.setResizable(false);
+		sl2Popup.setOpacity(0);
+		sl2Popup.setOnShown(event -> {
+			sl2Popup.setX(mainWindow.getX() + mainWindow.getWidth() / 2 - sl2Popup.getWidth() / 2);
+			sl2Popup.setY(mainWindow.getY() + mainWindow.getHeight() / 2 - sl2Popup.getHeight() / 2);
 
+			new Thread(() -> {
+				try {
+					Thread.sleep(POPUP_DELAY);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				Platform.runLater(() -> {
+					sl2Popup.setOpacity(1);
+				});
+			}).start();
+		});
+		
+		sl2Popup.setOnHidden(event -> {
+			Platform.runLater(() -> {
+				overlayStage.close();
+			});
+		});
+
+		// Setup popup scene
 		VBox popupVBox = new VBox();
-		popupVBox.getStyleClass().addAll("theme", "popup");
+		popupVBox.getStyleClass().addAll("popup-pane");
 		popupVBox.setAlignment(Pos.CENTER);
 
 		Label popupLabel = new Label("Vanilla save file extension (.sl2) selected.\n"
-				+ "Are you sure you want to use vanilla saves in seamless coop?");
-		popupLabel.getStyleClass().add("popup-label");
+				+ "Are you sure you want to use vanilla saves in Seamless Co-op?");
+		popupLabel.getStyleClass().addAll("popup-label", "popup-secondary");
 		popupLabel.setTextAlignment(TextAlignment.CENTER);
 
 		HBox buttonBox = new HBox();
@@ -1002,12 +1201,12 @@ public class View {
 		popupVBox.getChildren().addAll(popupLabel, buttonBox);
 
 		Scene popupScene = new Scene(popupVBox);
-		popupScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		popupScene.setOnMousePressed(event -> {
 			popupVBox.requestFocus();
 		});
 
-		popupVBox.requestFocus();
+		noButton.requestFocus();
 		sl2Popup.setScene(popupScene);
 		sl2Popup.showAndWait();
 
@@ -1019,36 +1218,91 @@ public class View {
 	 * update is complete.
 	 */
 	private void updateERSC() {
-		// Create loading popup
+		final Window mainWindow = configScene.getWindow();
+		
+		// Overlay stage to darken main stage
+		final Stage overlayStage = new Stage();
+		overlayStage.initOwner(mainWindow);
+		overlayStage.initModality(Modality.WINDOW_MODAL);
+		overlayStage.initStyle(StageStyle.TRANSPARENT);
+		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
+		overlayStage.setX(mainWindow.getX() + configScene.getX());
+		overlayStage.setY(mainWindow.getY() + configScene.getY());
+		
+		VBox overlayBox = new VBox();
+		overlayBox.getStyleClass().add("popup-overlay");
+		
+		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
+		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
+		overlayStage.setScene(overlayScene);
+		overlayStage.show();
+		
+		// Popup stage
 		final Stage downloadPopup = new Stage();
-		downloadPopup.setTitle("Updating Seamless Coop");
-		downloadPopup.initModality(Modality.APPLICATION_MODAL);
+		downloadPopup.initOwner(overlayStage);
+		downloadPopup.initModality(Modality.WINDOW_MODAL);
 		downloadPopup.initStyle(StageStyle.UNDECORATED);
+		downloadPopup.setOpacity(0);
+		downloadPopup.setOnShown(event -> {
+			downloadPopup.setX(mainWindow.getX() + mainWindow.getWidth() / 2 - downloadPopup.getWidth() / 2);
+			downloadPopup.setY(mainWindow.getY() + mainWindow.getHeight() / 2 - downloadPopup.getHeight() / 2);
+			
+			new Thread(() -> {
+				try {
+					Thread.sleep(POPUP_DELAY);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				
+				Platform.runLater(() -> {
+					downloadPopup.setOpacity(1);
+				});
+			}).start();
+		});
+
+		downloadPopup.setOnHidden(event -> {
+			Platform.runLater(() -> {
+				overlayStage.close();
+			});
+		});
+
+		// Begin popup scene creation
+		VBox popupVBox = new VBox();
+		popupVBox.getStyleClass().addAll("popup-pane");
+		popupVBox.setAlignment(Pos.CENTER);
+
+		Label popupLabel = new Label("Updating...");
+		popupLabel.setId("update-label");
 
 		// Start update in new thread
 		new Thread(() -> {
-			controller.updateERSC(model.getProgPath() + "\\ERSC Manager\\Configs\\" + Model.DEFAULT_CONFIG_NAME + ".ini");
+			if (controller.updateERSC(model.getProgPath() + "\\ERSC Manager\\Configs\\" + Model.DEFAULT_CONFIG_NAME + ".ini")) {
+				Platform.runLater(() -> {
+					popupLabel.setText("Update complete!");
+				});
+			} else {
+				Platform.runLater(() -> {
+					popupLabel.setText("Update failed");
+				});
+			}
 
-			// Close download popup once update is finished
+			// Wait a moment then close popup once update is finished
+			try {
+				Thread.sleep(1500);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			
 			Platform.runLater(() -> {
 				downloadPopup.close();
 			});
 		}).start();
 
 		// Continue popup creation
-		VBox popupVBox = new VBox();
-		popupVBox.getStyleClass().addAll("theme", "popup");
-		popupVBox.setStyle("-fx-background-color: yellow;");
-		popupVBox.setAlignment(Pos.CENTER);
-
-		Label popupLabel = new Label("Updating...");
-		popupLabel.getStyleClass().add("popup-label");
-		popupLabel.setTextAlignment(TextAlignment.CENTER);
-
 		popupVBox.getChildren().addAll(popupLabel);
 
-		Scene popupScene = new Scene(popupVBox, 300, 200);
-		popupScene.getStylesheets().add(this.getClass().getResource("style.css").toExternalForm());
+		Scene popupScene = new Scene(popupVBox, 225, 150);
+		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 
 		downloadPopup.setScene(popupScene);
 		downloadPopup.showAndWait();
