@@ -1,50 +1,30 @@
 
 * {
-	/* 000000 0d1117 1e1f22 1f1f1f 252629 30363d 313338 40424a 4e5058 6d6f78 */
-	/* c9d1d9 f2f3f5 ffffff */
-	
-	/* PREV THEME: bg: d1 | text: l3 | border: d7 | tf: d2 | button: grad(d6,d4) */
-	
 	/* General */
-	-light1: #ffffff;
-	-light2: #f2f3f5;
-	-light3: #bbbbbb;
-	
-	-dark1: #000000;
-	-dark2: #0d1117;
-	-dark3: #1e1f22;
-	-dark4: #252629;
-	-dark5: #30363d;
-	-dark6: #313338;
-	-dark7: #40424a;
-	-dark8: #4e5058;
-	-dark9: #6d6f78;
-	
 	-green1: #107c10;
+	-red1: #e81123;
 	
-	-yt-bg: #0f0f0f;
-	-yt-border: #3f3f3f;
-	-yt-button: #272727;
-	-yt-button-hover: #3f3f3f;
-	-yt-tf: #121212;
-	-yt-menu: #282828;
-	-yt-scroll-bar: #5f5f5f; /* 717171 */
-	
-	-color-text: -light3;
-	-color-divider: -light3;
-	-color-background: -yt-bg;
+	-color-text: #bbbbbb;
+	-color-divider: derive(-color-text, -50%);
+	-color-background: #0f0f0f;
 	-color-focus: -green1;
 	-color-highlight: -green1;
+	
 	-shape-check-mark: "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z";
+	-shape-minimize: "M 0 0 L 1 0 L 1 1 L 0 1";
+	-shape-close: "M 1 0 L 9 8 L 17 0 L 18 1 L 10 9 L 18 17 L 17 18 L 9 10 L 1 18 L 0 17 L 8 9 L 0 1";
+	
+	/* Stage */
+	-color-stage-border: #3f3f3f;
 	
 	/* Button */
-	-color-button-bg: -yt-button;
+	-color-button-bg: #272727;
 	-color-button-bg-hover: derive(-color-button-bg, 20%);
-	-color-button-border: -yt-border;
+	-color-button-border: #3f3f3f;
 	-color-button-border-hover: derive(-color-button-border, 20%);
 	
 	/* Text Field */
-	-color-text-field-bg: -yt-tf;
+	-color-text-field-bg: #121212;
 	-color-text-field-border: -color-button-border;
 	
 	/* Check Box */
@@ -59,7 +39,7 @@
 	-color-choice-box-bg-hover: -color-button-bg-hover;
 	-color-choice-box-border: -color-button-border;
 	-color-choice-box-border-hover: -color-button-border-hover;
-	-color-choice-box-menu-bg: -yt-menu;
+	-color-choice-box-menu-bg: #282828;
 	-color-choice-box-menu-bg-focused: -color-button-bg-hover;
 	-color-choice-box-menu-border: -color-choice-box-border;
 	
@@ -73,7 +53,15 @@
 	/* Scroll Bar */
 	-color-scroll-bar-bg: -color-list-view-bg;
 	-color-scroll-bar-border: -color-button-border;
-	-color-scroll-bar-thumb: -yt-scroll-bar;
+	-color-scroll-bar-thumb: #5f5f5f;
+	
+	/* Window Bar */
+	-color-window-bar-bg: #000000;
+	-color-window-bar-border: #252525;
+	-color-window-bar-text: -color-text;
+	-color-window-bar-button: -color-window-bar-bg;
+	-color-window-bar-button-hover: derive(-color-window-bar-button, 20%);
+	-color-window-bar-button-close: -red1;
 }
 
 /************************************************\
@@ -99,19 +87,6 @@
 
 .button:hover {
 	-fx-background-color: -color-button-border-hover, -color-button-bg-hover;
-	
-	/*-fx-background-color: #54545e, #54545e, #60616b, #6d6f78;
-    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
-    -fx-background-radius: 3px, 3px, 2px, 1px;
-    -fx-padding: 0.333333em 0.666667em 0.333333em 0.666667em;*/
-	
-    /*-fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
-    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
-    -fx-background-radius: 3px, 3px, 2px, 1px;
-    -fx-padding: 0.333333em 0.666667em 0.333333em 0.666667em; /* 4 8 4 8 *//*
-    -fx-text-fill: -fx-text-base-color;
-    -fx-alignment: CENTER;
-    -fx-content-display: LEFT;*/
 }
 
 .button:focused {
@@ -125,8 +100,8 @@
 /* -- Text Field -- */
 
 .text-field {
-	-fx-min-width: 50px;
 	-fx-pref-width: 70px;
+	-fx-min-width: 50px;
 	-fx-background-color: -color-text-field-border, -color-text-field-bg;
 	-fx-text-fill: -color-text;
 }
@@ -312,11 +287,16 @@
 .config-body-label {
 	-fx-alignment: center-left;
 	-fx-text-alignment: center;
-	-fx-pref-width: 160px;
 	-fx-min-width: 160px;
 }
 
 /* -- Background Panes --*/
+
+.stage-container {
+	-fx-background-color: -color-background;
+	-fx-border-color: -color-stage-border;
+	-fx-border-width: 0.5;
+}
 
 .main-pane {
 	-fx-background-color: -color-background;
@@ -332,12 +312,11 @@
 }
 
 .config-center {
-	-fx-padding: 0;
+	/* Padding removes two weird artifacts along right edge:
+	right border not showing and borderpane center/bottom unaligned by 1px */
+	-fx-padding: 0 -1 0 0;
 	-fx-hgap: 5;
 	-fx-vgap: 1.5;
-	-fx-border-color: black;
-	-fx-border-insets: 0;
-	-fx-border-width: 0 0 0 0;
 }
 
 .bottom-controls {
@@ -362,8 +341,6 @@
 	-fx-background-color: -color-background;
 	-fx-spacing: 5;
 	-fx-padding: 5;
-	-fx-border-color: -yt-border;
-	-fx-border-width: 0.5;
 }
 
 .popup-label {
@@ -378,4 +355,66 @@
 #update-label {
 	-fx-text-alignment: center;
 	-fx-font-size: 16;
+}
+
+/* -- Window Bar -- */
+
+.window-bar {
+	-fx-background-color: -color-window-bar-bg;
+	-fx-alignment: center;
+	-fx-padding: 0 0 0 7.2;
+	-fx-border-color: -color-window-bar-border;
+	-fx-border-width: 0 0 0.5 0;
+}
+
+.window-bar .label {
+	-fx-text-fill: -color-window-bar-text;
+}
+
+.window-bar .image-wrapper {
+	-fx-alignment: center;
+	-fx-padding: 0 5 0 0;
+}
+
+.window-bar .button {
+	-height: 28.8;
+	-width: 32.8;
+	-fx-min-height: -height;
+	-fx-max-height: -height;
+	-fx-min-width: -width;
+	-fx-max-width: -width;
+	-fx-background-color: -color-window-bar-button;
+	-fx-background-radius: 0;
+}
+
+.window-bar .window-min-button:hover {
+	-fx-background-color: -color-window-bar-button-hover;
+}
+
+.window-bar .window-min-button .icon {
+    -fx-background-color: -color-window-bar-text;
+    -size: 9.6;
+    -fx-min-height: 0.8;
+    -fx-max-height: 0.8;
+    -fx-min-width: -size;
+    -fx-max-width: -size;
+	-fx-shape: -shape-minimize;
+}
+
+.window-bar .window-close-button:hover {
+	-fx-background-color: -color-window-bar-button-close;
+}
+
+.window-bar .window-close-button .icon {
+    -fx-background-color: -color-window-bar-text;
+    -size: 9.6;
+    -fx-min-height: -size;
+    -fx-max-height: -size;
+    -fx-min-width: -size;
+    -fx-max-width: -size;
+	-fx-shape: -shape-close;
+}
+
+.window-bar .window-close-button:hover .icon {
+    -fx-background-color: #ffffff;
 }

@@ -44,15 +44,16 @@ public class View {
 	public static final String TITLE = "Elden Ring Seamless Co-op Manager";
 	public static final String ICON = "grace.png";
 	public static final String STYLE_SHEET = "style.css";
-	
+
 	private static final int SPACING = 5;
 	private static final int POPUP_DELAY = 50;
-	private static final double OVERLAY_TRANSPARENCY = 0.5;
+	private static final double OVERLAY_TRANSPARENCY = 0.3;
 
 	/* -- General -- */
 	private Model model;
 	private Controller controller;
 
+	private boolean proceed;
 	private boolean confirmed;
 	private boolean shouldClearConfigSelection;
 
@@ -118,9 +119,16 @@ public class View {
 	 * Creates and arranges all the necessary gui elements.
 	 */
 	private void setupPane() {
+		VBox stageContainer = new VBox();
+		stageContainer.getStyleClass().add("stage-container");
+
+		TitleBar titleBar = new TitleBar(TITLE, true, true);
+
 		// Config Pane
 		configPane = new BorderPane();
 		configPane.getStyleClass().addAll("main-pane");
+
+		stageContainer.getChildren().addAll(titleBar, configPane);
 
 		/* LEFT -- config selector */
 		configLeft = new VBox();
@@ -297,7 +305,7 @@ public class View {
 		configBottom.getChildren().addAll(updateButton, launchButton, closeButton);
 
 		// Scene properties
-		configScene = new Scene(configPane);
+		configScene = new Scene(stageContainer);
 		configScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 	}
 
@@ -319,17 +327,21 @@ public class View {
 	}
 
 	/**
-	 * Popup when Elden Ring cannot be found. Asks for then validates a path to the
-	 * game folder.
+	 * Popup when Elden Ring cannot be found. Asks for, then validates, a path to
+	 * the game folder.
 	 */
 	private void noER() {
+		proceed = false;
+
 		final Stage noERpopup = new Stage();
 		noERpopup.setTitle(TITLE);
-		noERpopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
-		noERpopup.setOnCloseRequest(event -> {
-			Platform.exit();
-			System.exit(0);
-		});
+		noERpopup.initStyle(StageStyle.UNDECORATED);
+
+		// Setup scene
+		VBox stageContainer = new VBox();
+		stageContainer.getStyleClass().add("stage-container");
+
+		TitleBar titleBar = new TitleBar(TITLE, true, true);
 
 		VBox popupVBox = new VBox();
 		popupVBox.getStyleClass().addAll("popup-pane");
@@ -370,31 +382,41 @@ public class View {
 			// Check if location entered is valid
 			if (controller.checkAndSetDirForER(locationField.getText())) {
 				noERpopup.close();
-				loadInitialConfig();
+				proceed = true;
 			} else {
 				wrongDirLabel.setText("Incorrect path");
+				locationField.requestFocus();
+				locationField.selectAll();
 			}
 		});
 
 		Button exitButton = new Button("Close");
 		exitButton.setOnAction(event -> {
-			Platform.exit();
-			System.exit(0);
+			noERpopup.close();
 		});
 
 		buttonBox.getChildren().addAll(okButton, exitButton);
 
 		popupVBox.getChildren().addAll(popupLabel, folderSelectBox, wrongDirLabel, buttonBox);
 
-		Scene popupScene = new Scene(popupVBox);
+		stageContainer.getChildren().addAll(titleBar, popupVBox);
+
+		Scene popupScene = new Scene(stageContainer);
 		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		popupScene.setOnMousePressed(event -> {
 			popupVBox.requestFocus();
 		});
 
-		popupVBox.requestFocus();
+		locationField.requestFocus();
 		noERpopup.setScene(popupScene);
 		noERpopup.showAndWait();
+
+		if (proceed) {
+			loadInitialConfig();
+		} else {
+			Platform.exit();
+			System.exit(0);
+		}
 	}
 
 	/**
@@ -402,18 +424,24 @@ public class View {
 	 * the "Update Seamless Coop" feature will download and install the mod.
 	 */
 	private void noERSC() {
+		proceed = false;
 		configLeft.setDisable(true);
 		configCenter.setDisable(true);
 		launchButton.setDisable(true);
 
 		final Stage noERSCpopup = new Stage();
 		noERSCpopup.setTitle(TITLE);
-		noERSCpopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
-		noERSCpopup.setResizable(false);
+		noERSCpopup.initStyle(StageStyle.UNDECORATED);
 		noERSCpopup.setOnCloseRequest(event -> {
 			Platform.exit();
 			System.exit(0);
 		});
+
+		// Setup scene
+		VBox stageContainer = new VBox();
+		stageContainer.getStyleClass().add("stage-container");
+
+		TitleBar titleBar = new TitleBar(TITLE, true, true);
 
 		VBox popupVBox = new VBox();
 		popupVBox.getStyleClass().addAll("popup-pane");
@@ -430,13 +458,16 @@ public class View {
 		Button okButton = new Button("Got it");
 		okButton.setOnAction(event -> {
 			noERSCpopup.close();
+			proceed = true;
 		});
 
 		buttonBox.getChildren().add(okButton);
 
 		popupVBox.getChildren().addAll(popupLabel, buttonBox);
 
-		Scene popupScene = new Scene(popupVBox);
+		stageContainer.getChildren().addAll(titleBar, popupVBox);
+
+		Scene popupScene = new Scene(stageContainer);
 		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		popupScene.setOnMousePressed(event -> {
 			popupVBox.requestFocus();
@@ -451,6 +482,11 @@ public class View {
 		popupVBox.requestFocus();
 		noERSCpopup.setScene(popupScene);
 		noERSCpopup.showAndWait();
+
+		if (!proceed) {
+			Platform.exit();
+			System.exit(0);
+		}
 	}
 
 	/**
@@ -687,7 +723,7 @@ public class View {
 	 */
 	private void createNewConfig() {
 		final Window mainWindow = configScene.getWindow();
-		
+
 		// Overlay stage to darken main stage
 		final Stage overlayStage = new Stage();
 		overlayStage.initOwner(mainWindow);
@@ -696,21 +732,21 @@ public class View {
 		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
 		overlayStage.setX(mainWindow.getX() + configScene.getX());
 		overlayStage.setY(mainWindow.getY() + configScene.getY());
-		
+
 		VBox overlayBox = new VBox();
 		overlayBox.getStyleClass().add("popup-overlay");
-		
+
 		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
 		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		overlayStage.setScene(overlayScene);
 		overlayStage.show();
-		
+
 		// Popup stage
 		final Stage newConfigPopup = new Stage();
 		newConfigPopup.setTitle("Create new config");
-		newConfigPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		newConfigPopup.initOwner(overlayStage);
 		newConfigPopup.initModality(Modality.WINDOW_MODAL);
+		newConfigPopup.initStyle(StageStyle.UNDECORATED);
 		newConfigPopup.setResizable(false);
 		newConfigPopup.setOpacity(0);
 		newConfigPopup.setOnShown(event -> {
@@ -723,13 +759,13 @@ public class View {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 				Platform.runLater(() -> {
 					newConfigPopup.setOpacity(1);
 				});
 			}).start();
 		});
-		
+
 		newConfigPopup.setOnHidden(event -> {
 			Platform.runLater(() -> {
 				overlayStage.close();
@@ -737,6 +773,11 @@ public class View {
 		});
 
 		// Setup popup scene
+		VBox stageContainer = new VBox();
+		stageContainer.getStyleClass().add("stage-container");
+
+		TitleBar titleBar = new TitleBar("Create new config", true, false);
+
 		VBox popupVBox = new VBox();
 		popupVBox.getStyleClass().addAll("popup-pane");
 		popupVBox.setAlignment(Pos.CENTER);
@@ -757,6 +798,12 @@ public class View {
 
 			return c;
 		}));
+
+		configNameField.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				newConfigPopup.close();
+			}
+		});
 
 		Label invalidLabel = new Label();
 		invalidLabel.getStyleClass().add("error-label");
@@ -801,16 +848,25 @@ public class View {
 			newConfigPopup.close();
 		});
 
+		// Assemble scene
 		buttonBox.getChildren().addAll(createButton, cancelButton);
 
 		popupVBox.getChildren().addAll(popupLabel, configNameField, invalidLabel, buttonBox);
 
-		Scene popupScene = new Scene(popupVBox);
+		stageContainer.getChildren().addAll(titleBar, popupVBox);
+
+		Scene popupScene = new Scene(stageContainer);
 		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 
 		popupScene.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ENTER) {
 				createButton.fire();
+			}
+		});
+
+		popupScene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				newConfigPopup.close();
 			}
 		});
 
@@ -832,7 +888,7 @@ public class View {
 		}
 
 		final Window mainWindow = configScene.getWindow();
-		
+
 		// Overlay stage to darken main stage
 		final Stage overlayStage = new Stage();
 		overlayStage.initOwner(mainWindow);
@@ -841,21 +897,22 @@ public class View {
 		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
 		overlayStage.setX(mainWindow.getX() + configScene.getX());
 		overlayStage.setY(mainWindow.getY() + configScene.getY());
-		
+
 		VBox overlayBox = new VBox();
 		overlayBox.getStyleClass().add("popup-overlay");
-		
+
 		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
 		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		overlayStage.setScene(overlayScene);
 		overlayStage.show();
-		
+
 		// Popup stage
 		final Stage convertPopup = new Stage();
 		convertPopup.setTitle("Convert posture scaling to absorption");
 		convertPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		convertPopup.initOwner(overlayStage);
 		convertPopup.initModality(Modality.WINDOW_MODAL);
+		convertPopup.initStyle(StageStyle.UNDECORATED);
 		convertPopup.setResizable(false);
 		convertPopup.setOpacity(0);
 		convertPopup.setOnShown(event -> {
@@ -868,13 +925,13 @@ public class View {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 				Platform.runLater(() -> {
 					convertPopup.setOpacity(1);
 				});
 			}).start();
 		});
-		
+
 		convertPopup.setOnHidden(event -> {
 			Platform.runLater(() -> {
 				overlayStage.close();
@@ -882,6 +939,11 @@ public class View {
 		});
 
 		// Setup popup scene
+		VBox stageContainer = new VBox();
+		stageContainer.getStyleClass().add("stage-container");
+
+		TitleBar titleBar = new TitleBar("Convert posture scaling to absorption", true, false);
+
 		VBox popupVBox = new VBox();
 		popupVBox.getStyleClass().addAll("popup-pane");
 		popupVBox.setAlignment(Pos.CENTER);
@@ -895,15 +957,26 @@ public class View {
 
 		HBox gridContainer = new HBox();
 		gridContainer.setAlignment(Pos.CENTER);
-		
+
 		GridPane convertPane = new GridPane();
 		convertPane.setStyle("-fx-hgap: 5; -fx-vgap: 1;");
 
 		Label numPlayersLabel = new Label("Number of players:");
 		GridPane.setHalignment(numPlayersLabel, HPos.RIGHT);
 		TextField numPlayersField = new TextField();
+		numPlayersField.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				convertPopup.close();
+			}
+		});
+
 		Label postureScalingLabel = new Label("Extra posture (%) per player:");
 		TextField postureScalingField = new TextField();
+		postureScalingField.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				convertPopup.close();
+			}
+		});
 
 		Label invalidLabel = new Label();
 		invalidLabel.getStyleClass().add("error-label");
@@ -958,7 +1031,6 @@ public class View {
 			df.setRoundingMode(RoundingMode.DOWN);
 			fieldToUpdate.setText(df.format(absorption * 100));
 			convertPopup.close();
-
 		});
 
 		Button cancelButton = new Button("Cancel");
@@ -970,14 +1042,16 @@ public class View {
 		convertPane.add(numPlayersField, 1, 0);
 		convertPane.add(postureScalingLabel, 0, 1);
 		convertPane.add(postureScalingField, 1, 1);
-		
+
 		gridContainer.getChildren().add(convertPane);
 
 		buttonBox.getChildren().addAll(convertButton, cancelButton);
 
 		popupVBox.getChildren().addAll(popupLabel, spacerLabel, gridContainer, invalidLabel, buttonBox);
 
-		Scene popupScene = new Scene(popupVBox);
+		stageContainer.getChildren().addAll(titleBar, popupVBox);
+
+		Scene popupScene = new Scene(stageContainer);
 		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		popupScene.setOnMousePressed(event -> {
 			popupVBox.requestFocus();
@@ -986,6 +1060,12 @@ public class View {
 		popupScene.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ENTER) {
 				convertButton.fire();
+			}
+		});
+
+		popupScene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				convertPopup.close();
 			}
 		});
 
@@ -999,7 +1079,7 @@ public class View {
 	 */
 	private void createSaveExt() {
 		final Window mainWindow = configScene.getWindow();
-		
+
 		// Overlay stage to darken main stage
 		final Stage overlayStage = new Stage();
 		overlayStage.initOwner(mainWindow);
@@ -1008,21 +1088,22 @@ public class View {
 		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
 		overlayStage.setX(mainWindow.getX() + configScene.getX());
 		overlayStage.setY(mainWindow.getY() + configScene.getY());
-		
+
 		VBox overlayBox = new VBox();
 		overlayBox.getStyleClass().add("popup-overlay");
-		
+
 		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
 		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		overlayStage.setScene(overlayScene);
 		overlayStage.show();
-		
+
 		// Popup stage
 		final Stage saveExtPopup = new Stage();
 		saveExtPopup.setTitle("Create save file extension");
 		saveExtPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		saveExtPopup.initOwner(overlayStage);
 		saveExtPopup.initModality(Modality.WINDOW_MODAL);
+		saveExtPopup.initStyle(StageStyle.UNDECORATED);
 		saveExtPopup.setResizable(false);
 		saveExtPopup.setOpacity(0);
 		saveExtPopup.setOnShown(event -> {
@@ -1035,13 +1116,13 @@ public class View {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 				Platform.runLater(() -> {
 					saveExtPopup.setOpacity(1);
 				});
 			}).start();
 		});
-		
+
 		saveExtPopup.setOnHidden(event -> {
 			Platform.runLater(() -> {
 				overlayStage.close();
@@ -1049,6 +1130,11 @@ public class View {
 		});
 
 		// Setup popup scene
+		VBox stageContainer = new VBox();
+		stageContainer.getStyleClass().add("stage-container");
+
+		TitleBar titleBar = new TitleBar("Create save file extension", true, false);
+
 		VBox popupVBox = new VBox();
 		popupVBox.getStyleClass().addAll("popup-pane");
 		popupVBox.setAlignment(Pos.CENTER);
@@ -1069,6 +1155,12 @@ public class View {
 
 			return c;
 		}));
+
+		saveFileField.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				saveExtPopup.close();
+			}
+		});
 
 		Label invalidExtLabel = new Label();
 		invalidExtLabel.getStyleClass().add("error-label");
@@ -1102,12 +1194,20 @@ public class View {
 
 		popupVBox.getChildren().addAll(popupLabel, saveFileField, invalidExtLabel, buttonBox);
 
-		Scene popupScene = new Scene(popupVBox);
+		stageContainer.getChildren().addAll(titleBar, popupVBox);
+
+		Scene popupScene = new Scene(stageContainer);
 		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 
 		popupScene.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ENTER) {
 				createButton.fire();
+			}
+		});
+
+		popupScene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				saveExtPopup.close();
 			}
 		});
 
@@ -1126,7 +1226,7 @@ public class View {
 		confirmed = false;
 
 		final Window mainWindow = configScene.getWindow();
-		
+
 		// Overlay stage to darken main stage
 		final Stage overlayStage = new Stage();
 		overlayStage.initOwner(mainWindow);
@@ -1135,21 +1235,22 @@ public class View {
 		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
 		overlayStage.setX(mainWindow.getX() + configScene.getX());
 		overlayStage.setY(mainWindow.getY() + configScene.getY());
-		
+
 		VBox overlayBox = new VBox();
 		overlayBox.getStyleClass().add("popup-overlay");
-		
+
 		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
 		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		overlayStage.setScene(overlayScene);
 		overlayStage.show();
-		
+
 		// Popup stage
 		final Stage sl2Popup = new Stage();
 		sl2Popup.setTitle("Confirm extension selection");
 		sl2Popup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		sl2Popup.initOwner(overlayStage);
 		sl2Popup.initModality(Modality.WINDOW_MODAL);
+		sl2Popup.initStyle(StageStyle.UNDECORATED);
 		sl2Popup.setResizable(false);
 		sl2Popup.setOpacity(0);
 		sl2Popup.setOnShown(event -> {
@@ -1162,13 +1263,13 @@ public class View {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 				Platform.runLater(() -> {
 					sl2Popup.setOpacity(1);
 				});
 			}).start();
 		});
-		
+
 		sl2Popup.setOnHidden(event -> {
 			Platform.runLater(() -> {
 				overlayStage.close();
@@ -1176,6 +1277,11 @@ public class View {
 		});
 
 		// Setup popup scene
+		VBox stageContainer = new VBox();
+		stageContainer.getStyleClass().add("stage-container");
+
+		TitleBar titleBar = new TitleBar("Confirm extension selection", true, false);
+
 		VBox popupVBox = new VBox();
 		popupVBox.getStyleClass().addAll("popup-pane");
 		popupVBox.setAlignment(Pos.CENTER);
@@ -1203,10 +1309,18 @@ public class View {
 
 		popupVBox.getChildren().addAll(popupLabel, buttonBox);
 
-		Scene popupScene = new Scene(popupVBox);
+		stageContainer.getChildren().addAll(titleBar, popupVBox);
+
+		Scene popupScene = new Scene(stageContainer);
 		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		popupScene.setOnMousePressed(event -> {
 			popupVBox.requestFocus();
+		});
+
+		popupScene.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				sl2Popup.close();
+			}
 		});
 
 		noButton.requestFocus();
@@ -1222,7 +1336,7 @@ public class View {
 	 */
 	private void updateERSC() {
 		final Window mainWindow = configScene.getWindow();
-		
+
 		// Overlay stage to darken main stage
 		final Stage overlayStage = new Stage();
 		overlayStage.initOwner(mainWindow);
@@ -1231,15 +1345,15 @@ public class View {
 		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
 		overlayStage.setX(mainWindow.getX() + configScene.getX());
 		overlayStage.setY(mainWindow.getY() + configScene.getY());
-		
+
 		VBox overlayBox = new VBox();
 		overlayBox.getStyleClass().add("popup-overlay");
-		
+
 		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
 		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 		overlayStage.setScene(overlayScene);
 		overlayStage.show();
-		
+
 		// Popup stage
 		final Stage downloadPopup = new Stage();
 		downloadPopup.initOwner(overlayStage);
@@ -1249,14 +1363,14 @@ public class View {
 		downloadPopup.setOnShown(event -> {
 			downloadPopup.setX(mainWindow.getX() + mainWindow.getWidth() / 2 - downloadPopup.getWidth() / 2);
 			downloadPopup.setY(mainWindow.getY() + mainWindow.getHeight() / 2 - downloadPopup.getHeight() / 2);
-			
+
 			new Thread(() -> {
 				try {
 					Thread.sleep(POPUP_DELAY);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 				Platform.runLater(() -> {
 					downloadPopup.setOpacity(1);
 				});
@@ -1295,7 +1409,7 @@ public class View {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
+
 			Platform.runLater(() -> {
 				downloadPopup.close();
 			});

@@ -6,8 +6,8 @@ import com.jkromberg.erscm.gui.View;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class Main extends Application {
 
@@ -25,7 +25,7 @@ public class Main extends Application {
 		// Stage properties
 		primaryStage.setScene(view.getScene());
 		primaryStage.setTitle(View.TITLE);
-		primaryStage.getIcons().add(new Image(View.class.getResourceAsStream(View.ICON)));
+		primaryStage.initStyle(StageStyle.UNDECORATED);
 		primaryStage.setOpacity(0);
 		primaryStage.setOnShown(event -> {
 			new Thread(() -> {
@@ -34,13 +34,13 @@ public class Main extends Application {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				
+
 				Platform.runLater(() -> {
 					primaryStage.setOpacity(1);
 				});
 			}).start();
 		});
-		
+
 		primaryStage.show();
 	}
 

@@ -137,6 +137,7 @@ public class Model {
 	 * 
 	 * @param pathToStoreDefaultConfig Location that the default settings should be
 	 *                                 copied to
+	 * @return True if successfully updated, false if not
 	 */
 	public boolean updateERSC(String pathToStoreDefaultConfig) {
 		if (updater.update(pathToStoreDefaultConfig)) {
@@ -144,7 +145,7 @@ public class Model {
 			Platform.runLater(() -> {
 				refreshConfigList();
 			});
-			
+
 			return true;
 		} else {
 			return false;
@@ -261,11 +262,9 @@ public class Model {
 	 * @param configName Name of config to delete
 	 */
 	public void deleteConfig(String configName) {
-		if (configName != DEFAULT_CONFIG_NAME) {
-			configNames.remove(configName);
-			configs.get(configName).delete();
-			configs.remove(configName);
-		}
+		configNames.remove(configName);
+		configs.get(configName).delete();
+		configs.remove(configName);
 	}
 
 	public String getGamePath() {

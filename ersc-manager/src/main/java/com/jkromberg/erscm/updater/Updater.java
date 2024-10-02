@@ -152,7 +152,7 @@ public class Updater {
 		}
 
 		// Reapply config
-		if (ini != null) {
+		if (ini != null && ini.exists()) {
 			ini.rewrite();
 		}
 
