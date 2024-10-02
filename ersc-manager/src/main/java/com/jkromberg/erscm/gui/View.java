@@ -47,7 +47,7 @@ public class View {
 
 	private static final int SPACING = 5;
 	private static final int POPUP_DELAY = 50;
-	private static final double OVERLAY_TRANSPARENCY = 0.3;
+	private static final double OVERLAY_TRANSPARENCY = 0.4;
 
 	/* -- General -- */
 	private Model model;
@@ -145,8 +145,6 @@ public class View {
 
 		configSelectControls = new HBox();
 		configSelectControls.getStyleClass().addAll("bottom-controls", "align-center");
-		configSelectControls.setAlignment(Pos.CENTER);
-		configSelectControls.setSpacing(SPACING);
 		configLeft.getChildren().add(configSelectControls);
 
 		deletePresetButton = new Button("Delete preset");
@@ -723,29 +721,12 @@ public class View {
 	 */
 	private void createNewConfig() {
 		final Window mainWindow = configScene.getWindow();
-
-		// Overlay stage to darken main stage
-		final Stage overlayStage = new Stage();
-		overlayStage.initOwner(mainWindow);
-		overlayStage.initModality(Modality.WINDOW_MODAL);
-		overlayStage.initStyle(StageStyle.TRANSPARENT);
-		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
-		overlayStage.setX(mainWindow.getX() + configScene.getX());
-		overlayStage.setY(mainWindow.getY() + configScene.getY());
-
-		VBox overlayBox = new VBox();
-		overlayBox.getStyleClass().add("popup-overlay");
-
-		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
-		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
-		overlayStage.setScene(overlayScene);
-		overlayStage.show();
+		configPane.setDisable(true);
 
 		// Popup stage
 		final Stage newConfigPopup = new Stage();
 		newConfigPopup.setTitle("Create new config");
-		newConfigPopup.initOwner(overlayStage);
-		newConfigPopup.initModality(Modality.WINDOW_MODAL);
+		newConfigPopup.initOwner(mainWindow);
 		newConfigPopup.initStyle(StageStyle.UNDECORATED);
 		newConfigPopup.setResizable(false);
 		newConfigPopup.setOpacity(0);
@@ -767,9 +748,7 @@ public class View {
 		});
 
 		newConfigPopup.setOnHidden(event -> {
-			Platform.runLater(() -> {
-				overlayStage.close();
-			});
+			configPane.setDisable(false);
 		});
 
 		// Setup popup scene
@@ -888,30 +867,13 @@ public class View {
 		}
 
 		final Window mainWindow = configScene.getWindow();
-
-		// Overlay stage to darken main stage
-		final Stage overlayStage = new Stage();
-		overlayStage.initOwner(mainWindow);
-		overlayStage.initModality(Modality.WINDOW_MODAL);
-		overlayStage.initStyle(StageStyle.TRANSPARENT);
-		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
-		overlayStage.setX(mainWindow.getX() + configScene.getX());
-		overlayStage.setY(mainWindow.getY() + configScene.getY());
-
-		VBox overlayBox = new VBox();
-		overlayBox.getStyleClass().add("popup-overlay");
-
-		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
-		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
-		overlayStage.setScene(overlayScene);
-		overlayStage.show();
+		configPane.setDisable(true);
 
 		// Popup stage
 		final Stage convertPopup = new Stage();
 		convertPopup.setTitle("Convert posture scaling to absorption");
 		convertPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
-		convertPopup.initOwner(overlayStage);
-		convertPopup.initModality(Modality.WINDOW_MODAL);
+		convertPopup.initOwner(mainWindow);
 		convertPopup.initStyle(StageStyle.UNDECORATED);
 		convertPopup.setResizable(false);
 		convertPopup.setOpacity(0);
@@ -933,9 +895,7 @@ public class View {
 		});
 
 		convertPopup.setOnHidden(event -> {
-			Platform.runLater(() -> {
-				overlayStage.close();
-			});
+			configPane.setDisable(false);
 		});
 
 		// Setup popup scene
@@ -1079,30 +1039,13 @@ public class View {
 	 */
 	private void createSaveExt() {
 		final Window mainWindow = configScene.getWindow();
-
-		// Overlay stage to darken main stage
-		final Stage overlayStage = new Stage();
-		overlayStage.initOwner(mainWindow);
-		overlayStage.initModality(Modality.WINDOW_MODAL);
-		overlayStage.initStyle(StageStyle.TRANSPARENT);
-		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
-		overlayStage.setX(mainWindow.getX() + configScene.getX());
-		overlayStage.setY(mainWindow.getY() + configScene.getY());
-
-		VBox overlayBox = new VBox();
-		overlayBox.getStyleClass().add("popup-overlay");
-
-		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
-		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
-		overlayStage.setScene(overlayScene);
-		overlayStage.show();
+		configPane.setDisable(true);
 
 		// Popup stage
 		final Stage saveExtPopup = new Stage();
 		saveExtPopup.setTitle("Create save file extension");
 		saveExtPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
-		saveExtPopup.initOwner(overlayStage);
-		saveExtPopup.initModality(Modality.WINDOW_MODAL);
+		saveExtPopup.initOwner(mainWindow);
 		saveExtPopup.initStyle(StageStyle.UNDECORATED);
 		saveExtPopup.setResizable(false);
 		saveExtPopup.setOpacity(0);
@@ -1124,9 +1067,7 @@ public class View {
 		});
 
 		saveExtPopup.setOnHidden(event -> {
-			Platform.runLater(() -> {
-				overlayStage.close();
-			});
+			configPane.setDisable(false);
 		});
 
 		// Setup popup scene
@@ -1226,30 +1167,13 @@ public class View {
 		confirmed = false;
 
 		final Window mainWindow = configScene.getWindow();
-
-		// Overlay stage to darken main stage
-		final Stage overlayStage = new Stage();
-		overlayStage.initOwner(mainWindow);
-		overlayStage.initModality(Modality.WINDOW_MODAL);
-		overlayStage.initStyle(StageStyle.TRANSPARENT);
-		overlayStage.setOpacity(OVERLAY_TRANSPARENCY);
-		overlayStage.setX(mainWindow.getX() + configScene.getX());
-		overlayStage.setY(mainWindow.getY() + configScene.getY());
-
-		VBox overlayBox = new VBox();
-		overlayBox.getStyleClass().add("popup-overlay");
-
-		Scene overlayScene = new Scene(overlayBox, configScene.getWidth(), configScene.getHeight());
-		overlayScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
-		overlayStage.setScene(overlayScene);
-		overlayStage.show();
+		configPane.setDisable(true);
 
 		// Popup stage
 		final Stage sl2Popup = new Stage();
 		sl2Popup.setTitle("Confirm extension selection");
 		sl2Popup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
-		sl2Popup.initOwner(overlayStage);
-		sl2Popup.initModality(Modality.WINDOW_MODAL);
+		sl2Popup.initOwner(mainWindow);
 		sl2Popup.initStyle(StageStyle.UNDECORATED);
 		sl2Popup.setResizable(false);
 		sl2Popup.setOpacity(0);
@@ -1271,9 +1195,7 @@ public class View {
 		});
 
 		sl2Popup.setOnHidden(event -> {
-			Platform.runLater(() -> {
-				overlayStage.close();
-			});
+			configPane.setDisable(false);
 		});
 
 		// Setup popup scene
@@ -1385,7 +1307,7 @@ public class View {
 
 		// Begin popup scene creation
 		VBox popupVBox = new VBox();
-		popupVBox.getStyleClass().addAll("popup-pane");
+		popupVBox.getStyleClass().addAll("popup-pane", "stage-container");
 		popupVBox.setAlignment(Pos.CENTER);
 
 		Label popupLabel = new Label("Updating...");
