@@ -62,6 +62,8 @@ public class TitleBar extends HBox {
 		if (canMinimize) {
 			minButton = new Button();
 			minButton.getStyleClass().add("window-min-button");
+			minButton.focusTraversableProperty().bind(this.focusTraversableProperty());
+			
 			Region minIcon = new Region();
 			minIcon.getStyleClass().add("icon");
 			minButton.setGraphic(minIcon);
@@ -69,6 +71,8 @@ public class TitleBar extends HBox {
 
 		closeButton = new Button();
 		closeButton.getStyleClass().add("window-close-button");
+		closeButton.focusTraversableProperty().bind(this.focusTraversableProperty());
+		
 		Region closeIcon = new Region();
 		closeIcon.getStyleClass().add("icon");
 		closeButton.setGraphic(closeIcon);

@@ -333,6 +333,7 @@ public class View {
 
 		final Stage noERpopup = new Stage();
 		noERpopup.setTitle(TITLE);
+		noERpopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		noERpopup.initStyle(StageStyle.UNDECORATED);
 
 		// Setup scene
@@ -429,6 +430,7 @@ public class View {
 
 		final Stage noERSCpopup = new Stage();
 		noERSCpopup.setTitle(TITLE);
+		noERSCpopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		noERSCpopup.initStyle(StageStyle.UNDECORATED);
 		noERSCpopup.setOnCloseRequest(event -> {
 			Platform.exit();
@@ -455,8 +457,8 @@ public class View {
 
 		Button okButton = new Button("Got it");
 		okButton.setOnAction(event -> {
-			noERSCpopup.close();
 			proceed = true;
+			noERSCpopup.close();
 		});
 
 		buttonBox.getChildren().add(okButton);
@@ -477,7 +479,7 @@ public class View {
 			}
 		});
 
-		popupVBox.requestFocus();
+		okButton.requestFocus();
 		noERSCpopup.setScene(popupScene);
 		noERSCpopup.showAndWait();
 
@@ -749,6 +751,7 @@ public class View {
 
 		newConfigPopup.setOnHidden(event -> {
 			configPane.setDisable(false);
+			savePresetButton.requestFocus();
 		});
 
 		// Setup popup scene
@@ -777,12 +780,6 @@ public class View {
 
 			return c;
 		}));
-
-		configNameField.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.ESCAPE) {
-				newConfigPopup.close();
-			}
-		});
 
 		Label invalidLabel = new Label();
 		invalidLabel.getStyleClass().add("error-label");
@@ -838,14 +835,18 @@ public class View {
 		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 
 		popupScene.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.ENTER) {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				newConfigPopup.close();
+			} else if (event.getCode() == KeyCode.ENTER) {
 				createButton.fire();
 			}
 		});
-
-		popupScene.setOnKeyPressed(event -> {
+		
+		configNameField.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ESCAPE) {
 				newConfigPopup.close();
+			} else if (event.getCode() == KeyCode.ENTER) {
+				createButton.fire();
 			}
 		});
 
@@ -872,7 +873,6 @@ public class View {
 		// Popup stage
 		final Stage convertPopup = new Stage();
 		convertPopup.setTitle("Convert posture scaling to absorption");
-		convertPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		convertPopup.initOwner(mainWindow);
 		convertPopup.initStyle(StageStyle.UNDECORATED);
 		convertPopup.setResizable(false);
@@ -896,6 +896,12 @@ public class View {
 
 		convertPopup.setOnHidden(event -> {
 			configPane.setDisable(false);
+			
+			if (fieldToUpdate == enemyPostureField) {
+				enemyConvertButton.requestFocus();
+			} else if (fieldToUpdate == bossPostureField) {
+				bossConvertButton.requestFocus();
+			}
 		});
 
 		// Setup popup scene
@@ -924,19 +930,9 @@ public class View {
 		Label numPlayersLabel = new Label("Number of players:");
 		GridPane.setHalignment(numPlayersLabel, HPos.RIGHT);
 		TextField numPlayersField = new TextField();
-		numPlayersField.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.ESCAPE) {
-				convertPopup.close();
-			}
-		});
 
 		Label postureScalingLabel = new Label("Extra posture (%) per player:");
 		TextField postureScalingField = new TextField();
-		postureScalingField.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.ESCAPE) {
-				convertPopup.close();
-			}
-		});
 
 		Label invalidLabel = new Label();
 		invalidLabel.getStyleClass().add("error-label");
@@ -1018,14 +1014,26 @@ public class View {
 		});
 
 		popupScene.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.ENTER) {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				convertPopup.close();
+			} else if (event.getCode() == KeyCode.ENTER) {
 				convertButton.fire();
 			}
 		});
 
-		popupScene.setOnKeyPressed(event -> {
+		numPlayersField.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ESCAPE) {
 				convertPopup.close();
+			} else if (event.getCode() == KeyCode.ENTER) {
+				convertButton.fire();
+			}
+		});
+
+		postureScalingField.setOnKeyPressed(event -> {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				convertPopup.close();
+			} else if (event.getCode() == KeyCode.ENTER) {
+				convertButton.fire();
 			}
 		});
 
@@ -1044,7 +1052,6 @@ public class View {
 		// Popup stage
 		final Stage saveExtPopup = new Stage();
 		saveExtPopup.setTitle("Create save file extension");
-		saveExtPopup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		saveExtPopup.initOwner(mainWindow);
 		saveExtPopup.initStyle(StageStyle.UNDECORATED);
 		saveExtPopup.setResizable(false);
@@ -1068,6 +1075,7 @@ public class View {
 
 		saveExtPopup.setOnHidden(event -> {
 			configPane.setDisable(false);
+			createSaveExtButton.requestFocus();
 		});
 
 		// Setup popup scene
@@ -1096,12 +1104,6 @@ public class View {
 
 			return c;
 		}));
-
-		saveFileField.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.ESCAPE) {
-				saveExtPopup.close();
-			}
-		});
 
 		Label invalidExtLabel = new Label();
 		invalidExtLabel.getStyleClass().add("error-label");
@@ -1141,14 +1143,18 @@ public class View {
 		popupScene.getStylesheets().add(View.class.getResource(STYLE_SHEET).toExternalForm());
 
 		popupScene.setOnKeyPressed(event -> {
-			if (event.getCode() == KeyCode.ENTER) {
+			if (event.getCode() == KeyCode.ESCAPE) {
+				saveExtPopup.close();
+			} else if (event.getCode() == KeyCode.ENTER) {
 				createButton.fire();
 			}
 		});
 
-		popupScene.setOnKeyPressed(event -> {
+		saveFileField.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ESCAPE) {
 				saveExtPopup.close();
+			} else if (event.getCode() == KeyCode.ENTER) {
+				createButton.fire();
 			}
 		});
 
@@ -1172,7 +1178,6 @@ public class View {
 		// Popup stage
 		final Stage sl2Popup = new Stage();
 		sl2Popup.setTitle("Confirm extension selection");
-		sl2Popup.getIcons().add(new Image(View.class.getResourceAsStream(ICON)));
 		sl2Popup.initOwner(mainWindow);
 		sl2Popup.initStyle(StageStyle.UNDECORATED);
 		sl2Popup.setResizable(false);
@@ -1196,6 +1201,7 @@ public class View {
 
 		sl2Popup.setOnHidden(event -> {
 			configPane.setDisable(false);
+			applyButton.requestFocus();
 		});
 
 		// Setup popup scene
