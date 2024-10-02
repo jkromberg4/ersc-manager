@@ -5,7 +5,7 @@
 	-red1: #e81123;
 	
 	-color-text: #bbbbbb;
-	-color-divider: derive(-color-text, -50%);
+	-color-divider: derive(-color-text, -10%);
 	-color-background: #0f0f0f;
 	-color-focus: -green1;
 	-color-highlight: -green1;
