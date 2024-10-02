@@ -46,7 +46,7 @@
 			  Workaround to make it run without CMD window:
 			  Build once, update image/bin/erscm-manager.bat with the following line:
 			  start "" "%DIR%\javaw" %JLINK_VM_OPTIONS% -m com.jkromberg.erscm/com.jkromberg.erscm.Main %* && exit 0
-			  Then remove jlink goal, build again, and replace jlink goal
+			  Then remove jlink goal, build again (without clean), and replace jlink goal
 			-->
             <plugin>
                 <groupId>org.openjfx</groupId>
@@ -55,6 +55,9 @@
                 <executions>
                     <execution>
                         <phase>package</phase>
+                        <goals>
+                            <goal>jlink</goal>
+                        </goals>
                     </execution>
                 </executions>
                 <configuration>
