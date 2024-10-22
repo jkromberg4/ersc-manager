@@ -12,16 +12,16 @@
 	
 	-shape-check-mark: "M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z";
 	-shape-minimize: "M 0 0 L 1 0 L 1 1 L 0 1";
-	-shape-close: "M 1 0 L 9 8 L 17 0 L 18 1 L 10 9 L 18 17 L 17 18 L 9 10 L 1 18 L 0 17 L 8 9 L 0 1";
+	-shape-close: "M0 0 1 0 7 6 13 0 14 0 14 1 8 7 14 13 14 14 13 14 7 8 1 14 0 14 0 13 6 7 0 1";
 	
 	/* Stage */
 	-color-stage-border: #3f3f3f;
 	
 	/* Button */
 	-color-button-bg: #272727;
-	-color-button-bg-hover: derive(-color-button-bg, 20%);
+	-color-button-bg-hover: #3f3f3f;
 	-color-button-border: #3f3f3f;
-	-color-button-border-hover: derive(-color-button-border, 20%);
+	-color-button-border-hover: #575757;
 	
 	/* Text Field */
 	-color-text-field-bg: #121212;
@@ -33,6 +33,8 @@
 	-color-check-box-bg-selected: -color-highlight;
 	-color-check-box-border: -color-button-border;
 	-color-check-box-border-hover: derive(-color-check-box-border, 20%);
+	-color-check-box-mark-hover: -color-check-box-bg;
+	-color-check-box-mark-selected: derive(-color-text, 10%);
 	
 	/* Choice Box */
 	-color-choice-box-bg: -color-button-bg;
@@ -47,8 +49,8 @@
 	-color-list-view-bg: -color-text-field-bg;
 	-color-list-view-border: -color-text-field-border;
 	-color-list-cell: -color-list-view-bg;
-	-color-list-cell-hover: -color-button-bg-hover;
-	-color-list-cell-selected: -color-highlight;
+	-color-list-cell-hover: derive(-color-button-bg, 10%);
+	-color-list-cell-selected: derive(-color-list-cell-hover, 20%);
 	
 	/* Scroll Bar */
 	-color-scroll-bar-bg: -color-list-view-bg;
@@ -126,7 +128,7 @@
 }
 
 .check-box:hover .mark {
-	-fx-background-color: -color-check-box-bg;
+	-fx-background-color: -color-check-box-mark-hover;
 }
 
 .check-box:focused .box {
@@ -142,7 +144,7 @@
 }
 
 .check-box:selected .mark {
-	-fx-background-color: -color-text;
+	-fx-background-color: -color-check-box-mark-selected;
 }
 
 .check-box:selected:hover .box {
@@ -154,7 +156,7 @@
 }
 
 .check-box:selected:focused:hover .box {
-	-fx-background-color: derive(derive(-color-focus, 20%), 20%), derive(-color-check-box-bg-selected, 20%);
+	-fx-background-color: derive(-color-focus, 40%), derive(-color-check-box-bg-selected, 20%);
 }
 
 /* -- Choice Box -- */
@@ -216,11 +218,6 @@
 
 .list-cell:filled:selected:focused {
 	-fx-background-color: -color-list-cell-selected;
-}
-
-.list-cell:filled:selected:focused:hover {
-	-fx-background-color: derive(-color-list-cell-selected, 20%);
-	-fx-text-fill: derive(-color-text, 10%);
 }
 
 /* -- List View: Scroll Bar -- */
@@ -377,14 +374,18 @@
 }
 
 .window-bar .button {
-	-height: 28.8;
 	-width: 32.8;
-	-fx-min-height: -height;
-	-fx-max-height: -height;
+	-height: 28.8;
 	-fx-min-width: -width;
 	-fx-max-width: -width;
+	-fx-min-height: -height;
+	-fx-max-height: -height;
 	-fx-background-color: -color-window-bar-button;
 	-fx-background-radius: 0;
+}
+
+.window-bar .button:hover .icon {
+    -fx-background-color: #ffffff;
 }
 
 .window-bar .window-min-button:hover {
@@ -393,11 +394,12 @@
 
 .window-bar .window-min-button .icon {
     -fx-background-color: -color-window-bar-text;
-    -size: 9.6;
-    -fx-min-height: 0.8;
-    -fx-max-height: 0.8;
-    -fx-min-width: -size;
-    -fx-max-width: -size;
+    -width: 9.6;
+    -height: 1;
+    -fx-min-width: -width;
+    -fx-max-width: -width;
+    -fx-min-height: -height;
+    -fx-max-height: -height;
 	-fx-shape: -shape-minimize;
 }
 
@@ -407,14 +409,11 @@
 
 .window-bar .window-close-button .icon {
     -fx-background-color: -color-window-bar-text;
-    -size: 9.6;
-    -fx-min-height: -size;
-    -fx-max-height: -size;
-    -fx-min-width: -size;
-    -fx-max-width: -size;
+    -width: 9.6;
+    -height: 9.6;
+    -fx-min-width: -width;
+    -fx-max-width: -width;
+    -fx-min-height: -height;
+    -fx-max-height: -height;
 	-fx-shape: -shape-close;
-}
-
-.window-bar .window-close-button:hover .icon {
-    -fx-background-color: #ffffff;
 }

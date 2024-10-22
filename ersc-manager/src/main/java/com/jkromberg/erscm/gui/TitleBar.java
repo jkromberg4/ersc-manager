@@ -90,13 +90,13 @@ public class TitleBar extends HBox {
 	private void addHandlers() {
 		// Window Drag
 		setOnMousePressed(event -> {
-			offsetX = getScene().getWindow().getX() - event.getScreenX();
-			offsetY = getScene().getWindow().getY() - event.getScreenY();
+			offsetX = event.getScreenX() - getScene().getWindow().getX();
+			offsetY = event.getScreenY() - getScene().getWindow().getY();
 		});
 
 		setOnMouseDragged(event -> {
-			getScene().getWindow().setX(event.getScreenX() + offsetX);
-			getScene().getWindow().setY(event.getScreenY() + offsetY);
+			getScene().getWindow().setX(event.getScreenX() - offsetX);
+			getScene().getWindow().setY(event.getScreenY() - offsetY);
 		});
 
 		// Window Buttons
